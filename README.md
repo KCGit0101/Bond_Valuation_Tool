@@ -196,8 +196,7 @@ Calculates the bond's dirty price (present value of all future cash flows) per s
         PV_Redemption = Redemption / ((1 + (Yield_Rate / Freq)) ^ (N - 1 + (DSC / E)))
         PV_Coupons = Sum [Coupon_Pmt / ((1 + (Yield_Rate / Freq)) ^ (k - 1 + (DSC / E)))] for k = 1 to N
         Dirty Price = PV_Redemption + PV_Coupons
-
-    Where:
+    Where :
         coupon_pmt: Periodic coupon payment (for base price 100).
         redemption: Redemption value at maturity (typically self.base_price).
         no_of_payment (N): Number of remaining coupon payments.
