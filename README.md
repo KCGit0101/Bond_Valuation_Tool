@@ -5,6 +5,7 @@ The Bond Valuation Tool is a Python application designed to perform comprehensiv
 The tool is interactive, prompting the user for necessary bond parameters like face value, coupon rate, yield rate, maturity date, and settlement date.
 
 
+
 # 2. Features
 - **Comprehensive Bond Metrics**: Calculates dirty price, clean price, accrued interest, and overall bond value.
 - **Bond Type Identification**: Classifies the bond as Premium, Discount, or Par.
@@ -22,6 +23,7 @@ Creates a professional Excel report (.xlsx) summarizing bond details and the amo
 - **Custom Rounding**: Implements a specific rounding logic for numerical precision in financial calculations (note: see details in section 8.1).
 
 
+
 # 3. Requirements
 The script relies on the following Python libraries:
 - 'datetime': For handling dates and times (standard library).
@@ -31,6 +33,7 @@ The script relies on the following Python libraries:
 - 'random': For generating a random number for the Excel file name (standard library).
 
 
+
 # 4. Installation
 Before running the script, you need to install the 'xlsxwriter' library if you haven't already. You can install it using pip:
 '''
@@ -38,6 +41,7 @@ pip install xlsxwriter
 '''
 
 All other required libraries (datetime, calendar, math, random) are part of the standard Python library and do not require separate installation.
+
 
 
 # 5. How to Use
@@ -61,6 +65,7 @@ The script will prompt you to enter the following details for the bond:
     - 1 for Annually
 - **Maturity Date of the Bond**: The date when the bond expires and the face value is repaid. Format: YYYY-MM-DD (e.g., 2030-12-31).
 - **Settlement/Valuation Date of the Bond**: The date on which the bond is being valued or traded. Format: YYYY-MM-DD (e.g., 2023-06-15).
+
 
 
 # 6. Output
@@ -118,6 +123,8 @@ An Excel file will be automatically generated and saved in the same directory wh
         A line chart visualizing the "Open Bond Value" from the amortization table against "Beginning Date".
 
 
+
+
 # 7. Code Deep Dive
 The script is structured into a helper function, two main classes (Bond and ExcelReport), and a main execution block.
 
@@ -157,26 +164,26 @@ This class encapsulates all the properties and calculations related to a specifi
     
     'coupon_dates': A sorted list of all coupon payment dates from the coupon date immediately preceding or on the settlement date, up to and including the maturity date.
     
-    self.no_of_payment: Total number of coupon payments remaining from the first coupon date after or on the settlement date until maturity. Calculated by __calculate_no_compounding_periods().
+   'self.no_of_payment': Total number of coupon payments remaining from the first coupon date after or on the settlement date until maturity. Calculated by __calculate_no_compounding_periods().
     
-    self.DSC (Days to Settlement of Coupon): Number of days from the settlement date to the next coupon payment date.
+    'self.DSC (Days to Settlement of Coupon)': Number of days from the settlement date to the next coupon payment date.
     
-    self.E (Days in Coupon Period): Number of days in the coupon period in which the settlement date falls (i.e., days between the previous/current coupon date and the next coupon date).
+    'self.E (Days in Coupon Period)': Number of days in the coupon period in which the settlement date falls (i.e., days between the previous/current coupon date and the next coupon date).
     
-    self.dirty_price: The bond's price per 100 units of face value, including accrued interest. Calculated by __calculate_bond_price().
+    'self.dirty_price': The bond's price per 100 units of face value, including accrued interest. Calculated by __calculate_bond_price().
     
-    self.bond_value: The total market value of the bond (dirty_price * face_value / base_price). Calculated by __get_bond_value().
+    'self.bond_value': The total market value of the bond (dirty_price * face_value / base_price). Calculated by __get_bond_value().
     
-    self.accrued_int: Accrued interest per 100 units of face value. Calculated by __accrued_int().
+    'self.accrued_int': Accrued interest per 100 units of face value. Calculated by __accrued_int().
     
-    self.clean_price: The bond's price per 100 units of face value, excluding accrued interest (dirty_price - accrued_int).
+    'self.clean_price': The bond's price per 100 units of face value, excluding accrued interest (dirty_price - accrued_int).
     
-    self.bond_type: Categorizes the bond as 'Premium Bond' (coupon rate > yield rate), 'Discounted Bond' (coupon rate < yield 
+    'self.bond_type': Categorizes the bond as 'Premium Bond' (coupon rate > yield rate), 'Discounted Bond' (coupon rate < yield 
     rate), or 'Par Bond' (coupon rate = yield rate).
     
-    self.compound_frequency: A string representation of the coupon frequency (e.g., "Semi-Annual"). Calculated by __compound_period().
+    'self.compound_frequency': A string representation of the coupon frequency (e.g., "Semi-Annual"). Calculated by __compound_period().
     
-    self.modified_duration = "": Initialized as an empty string. Note: This attribute is not currently calculated or used by the application.
+    'self.modified_duration' = "": Initialized as an empty string. Note: This attribute is not currently calculated or used by the application.
 
 ### 7.2.2. Key Financial Calculations
 __calculate_coupon_payments(self, face_value):
@@ -185,119 +192,137 @@ Used to calculate self.base_coupon_payments (with face_value=100) and actual cou
 
 __calculate_bond_price(self, coupon_pmt, redemption, no_of_payment, DSC, E):
 Calculates the bond's dirty price (present value of all future cash flows) per self.base_price (100).
-Formula:
-PV_Redemption = Redemption / ((1 + (Yield_Rate / Freq)) ^ (N - 1 + (DSC / E)))
-PV_Coupons = Sum [Coupon_Pmt / ((1 + (Yield_Rate / Freq)) ^ (k - 1 + (DSC / E)))] for k = 1 to N
-Dirty Price = PV_Redemption + PV_Coupons
+    Formula:
+        PV_Redemption = Redemption / ((1 + (Yield_Rate / Freq)) ^ (N - 1 + (DSC / E)))
+        PV_Coupons = Sum [Coupon_Pmt / ((1 + (Yield_Rate / Freq)) ^ (k - 1 + (DSC / E)))] for k = 1 to N
+        Dirty Price = PV_Redemption + PV_Coupons
 
-Where:
-coupon_pmt: Periodic coupon payment (for base price 100).
-redemption: Redemption value at maturity (typically self.base_price).
-no_of_payment (N): Number of remaining coupon payments.
-DSC: Days from settlement to the next coupon date.
-E: Days in the coupon period where settlement occurs.
-Yield_Rate: Periodic yield (self.yield_rate / self.coupon_frequency).
-The result is rounded using the custom round_number function.
+    Where:
+        coupon_pmt: Periodic coupon payment (for base price 100).
+        redemption: Redemption value at maturity (typically self.base_price).
+        no_of_payment (N): Number of remaining coupon payments.
+        DSC: Days from settlement to the next coupon date.
+        E: Days in the coupon period where settlement occurs.
+        Yield_Rate: Periodic yield (self.yield_rate / self.coupon_frequency).
+        The result is rounded using the custom round_number function.
+
 __accrued_int(self, coupon_pmt, DSC, E):
 Calculates the accrued interest per self.base_price (100).
-Formula: Coupon_Pmt * (E - DSC) / E
-This represents the portion of the next coupon payment that has "accrued" between the last coupon date and the settlement date.
-The result is rounded using the custom round_number function.
+    Formula: Coupon_Pmt * (E - DSC) / E
+    This represents the portion of the next coupon payment that has "accrued" between the last coupon date and the settlement date.
+    The result is rounded using the custom round_number function.
+
 Clean Price: Calculated as self.dirty_price - self.accrued_int.
-7.2.3. Date Handling
+
+### 7.2.3. Date Handling
 __add_months(self, sourcedate, months):
 A utility function to add or subtract a specified number of months from a given datetime.date object.
 Handles month-end conventions correctly (e.g., adding 1 month to Jan 31st results in Feb 28th/29th).
+
 __generate_coupon_dates(self):
 Generates all relevant coupon payment dates.
 Starts from the maturity_date and works backward by months_interval = 12 / coupon_frequency.
 Continues adding past coupon dates until a date earlier than or on the settlement_date is found.
 The list of coupon dates is then sorted chronologically.
 Returns a dictionary: {'settlement_date': self.settlement_date, 'coupon_dates': [list_of_dates]}. The first date in coupon_dates is the coupon date immediately preceding or on the settlement date.
+
 __calculate_no_compounding_periods(self, start_date, end_date, compounding_frequency):
 Calculates the total number of compounding (coupon) periods between a start_date and end_date.
 It determines the total months and divides by the number of months per period (12 / compounding_frequency), rounding up (math.ceil) to ensure all partial periods are counted.
+
 __no_of_days_between_dates(self, start_date, end_date):
 A simple utility to calculate the absolute number of days between two datetime.date objects.
-7.2.4. Amortization Table (get_bond_amortization_table)
-Purpose: Generates a period-by-period breakdown of the bond's value, interest, and coupon payments.
-Logic:
-Retrieves all coupon dates and the settlement date.
-Initializes an amortization_table list.
-Backward Calculation for Opening Values: It iterates backward from the maturity date. For each coupon date, it calculates the bond's dirty price as if that coupon date were the valuation date with DSC=1, E=1 (simplification for on-coupon-date valuation). This price is converted to the bond's opening value for that period.
-The n-1 in self.__calculate_bond_price(base_coupon_payment, redemption, n-1, 1, 1) refers to the number of future payments from that point.
-Forward Calculation for Payments: It then iterates through the table (excluding the last entry, which is maturity):
-Interest Payment = Next Period's Open Bond Value - Current Period's Open Bond Value + Actual Coupon Payment. This is derived from the accounting identity: Opening Balance + Interest - Payment = Closing Balance.
-Coupon Payment is the actual periodic coupon payment based on the bond's face_value.
-Closing Bond Value is the Open Bond Value of the next period.
-Settlement Date Adjustment: If the settlement_date is not a coupon payment date:
-The first period in the table (from the previous coupon date to the next coupon date) is split into two:
-One sub-period from the previous coupon date to the settlement_date.
-Another sub-period from the settlement_date to the next coupon date.
-Interest and coupon payments are adjusted accordingly for these partial periods. The first partial period up to settlement shows zero coupon payment (as it's not yet paid).
-The bond value at the settlement_date is self.bond_value (the initially calculated market value).
 
-7.2.5. Other Helper Methods
+### 7.2.4. Amortization Table (get_bond_amortization_table)
+
+- **Purpose**: Generates a period-by-period breakdown of the bond's value, interest, and coupon payments.
+- **Logic**:
+        - Retrieves all coupon dates and the settlement date.
+        -Initializes an amortization_table list.
+        - Backward Calculation for Opening Values: It iterates backward from the maturity date. For each coupon date, it        calculates the bond's dirty price as if that coupon date were the valuation date with DSC=1, E=1 (simplification for on-coupon-date valuation). This price is converted to the bond's opening value for that period.
+        - The n-1 in self.__calculate_bond_price(base_coupon_payment, redemption, n-1, 1, 1) refers to the number of future payments from that point.
+        - Forward Calculation for Payments: It then iterates through the table (excluding the last entry, which is maturity):
+        - Interest Payment = Next Period's Open Bond Value - Current Period's Open Bond Value + Actual Coupon Payment. This is derived from the accounting identity: Opening Balance + Interest - Payment = Closing Balance.
+        - Coupon Payment is the actual periodic coupon payment based on the bond's face_value.
+        - Closing Bond Value is the Open Bond Value of the next period.
+        - Settlement Date Adjustment: If the settlement_date is not a coupon payment date:
+        - The first period in the table (from the previous coupon date to the next coupon date) is split into two:
+        - One sub-period from the previous coupon date to the settlement_date.
+        - Another sub-period from the settlement_date to the next coupon date.
+        - Interest and coupon payments are adjusted accordingly for these partial periods. The first partial period up to settlement shows zero coupon payment (as it's not yet paid).
+        - The bond value at the settlement_date is self.bond_value (the initially calculated market value).
+
+### 7.2.5. Other Helper Methods
 __compound_period(self):
 Returns a string describing the compounding frequency (e.g., "Monthly", "Quarterly", "Semi-Annual", "Annual") based on self.coupon_frequency.
+
 __get_bond_value(self, face_value, dirty_price):
 Calculates the total market value of the bond: (dirty_price * face_value) / self.base_price.
 
-7.3. ExcelReport Class
+## 7.3. ExcelReport Class
 This class is responsible for generating the Excel output file.
 
 ### 7.3.1. generate_excel_report(...)
-Parameters: Takes numerous parameters, including calculated bond metrics (face_value, bond_value, dirty/clean prices, accrued interest, rates, dates, etc.) and the amortization_table.
-Functionality:
-File Creation: Creates a new Excel workbook and a worksheet named "Bond Report". The filename is BondFaceValue_MaturityDate_RandomNumber.xlsx.
-Formatting: Defines various cell formats (header, topics, currency, date, percentages, alignment, colors) for a professional look.
-Hides Gridlines: Improves visual appeal.
-Sets Column Widths: Adjusts column widths for better readability.
-Writes Bond Summary: Populates cells with the bond's summary information, using the defined formats. This includes:
-Face Value, Bond Value, Clean Price, Accrued Interest (both actual values and per 100 base price).
-Key dates (Settlement, Previous/Next Coupon, Maturity).
-Other details (No. of Coupons, Yield/Coupon Rates, Frequency, Bond Type).
-Writes Amortization Table:
-Writes headers for the amortization table.
-Iterates through the amortization_table data, writing each row to the worksheet.
-Applies currency and date formatting.
-Highlights the row corresponding to the settlement date with a distinct format (red text, bold).
-Adds a final row for the maturity date showing the final bond value (which should be the face value if held to maturity, or the redemption value used in calculations).
-Creates Line Chart:
-Adds a line chart to the worksheet.
-Series Name: "Bond Value".
-Categories (X-axis): "Beginning Date" column from the amortization table.
-Values (Y-axis): "Open Bond Value" column from the amortization table.
-Customizes line and marker appearance.
-Sets chart title and axis labels.
-Inserts the chart below the amortization table.
-Hides Unused Columns/Rows: Cleans up the view by hiding columns beyond the report content.
-Saves Workbook: Closes and saves the Excel file.
-Prints a confirmation message to the console.
+- **Parameters**: Takes numerous parameters, including calculated bond metrics (face_value, bond_value, dirty/clean prices,     accrued interest, rates, dates, etc.) and the amortization_table.
 
-7.4. Main Execution Block (if __name__ == "__main__":)
+- **Functionality**:
+    - File Creation: Creates a new Excel workbook and a worksheet named "Bond Report". The filename is  BondFaceValue_MaturityDate_RandomNumber.xlsx.
+    - Formatting: Defines various cell formats (header, topics, currency, date, percentages, alignment, colors) for a professional look.
+    - Hides Gridlines: Improves visual appeal.
+    - Sets Column Widths: Adjusts column widths for better readability.
+    - Writes Bond Summary: Populates cells with the bond's summary information, using the defined formats. This includes:
+        - Face Value, Bond Value, Clean Price, Accrued Interest (both actual values and per 100 base price).
+        - Key dates (Settlement, Previous/Next Coupon, Maturity).
+        - Other details (No. of Coupons, Yield/Coupon Rates, Frequency, Bond Type).
+    - Writes Amortization Table:
+        - Writes headers for the amortization table.
+        - Iterates through the amortization_table data, writing each row to the worksheet.
+        - Applies currency and date formatting.
+        - Highlights the row corresponding to the settlement date with a distinct format (red text, bold).
+        - Adds a final row for the maturity date showing the final bond value (which should be the face value if held to maturity, or the redemption value used in calculations).
+    - Creates Line Chart:
+        - Adds a line chart to the worksheet.
+        - Series Name: "Bond Value".
+        - Categories (X-axis): "Beginning Date" column from the amortization table.
+        - Values (Y-axis): "Open Bond Value" column from the amortization table.
+        - Customizes line and marker appearance.
+        - Sets chart title and axis labels.
+        - Inserts the chart below the amortization table.
+        - Hides Unused Columns/Rows: Cleans up the view by hiding columns beyond the report content.
+        - Saves Workbook: Closes and saves the Excel file.
+        - Prints a confirmation message to the console.
+
+## 7.4. Main Execution Block (if __name__ == "__main__":)
 This block runs when the script is executed directly.
-User Input:
-Prints a header for the "Bond Valuation Report".
-Prompts the user to enter all necessary bond parameters (face value, rates, frequency, dates).
-Converts date strings to datetime.date objects.
-Bond Object Creation:
+
+- **User Input**:
+    - Prints a header for the "Bond Valuation Report".
+    - Prompts the user to enter all necessary bond parameters (face value, rates, frequency, dates).
+    - Converts date strings to datetime.date objects.
+
+- **Bond Object Creation**:
 Creates an instance of the Bond class: my_Bond = Bond(...). This triggers all the internal calculations within the Bond object.
-Data Retrieval:
+
+- **Data Retrieval**:
 Extracts the calculated metrics (dirty price, bond value, accrued interest, clean price, dates, etc.) from the my_Bond object attributes.
-Console Output:
+
+- **Console Output**:
 Prints a formatted summary of the key calculated bond metrics to the console.
-Excel Report Generation:
+
+- **Excel Report Generation**:
 Creates an instance of the ExcelReport class: my_excel_report = ExcelReport().
 Calls the generate_excel_report() method, passing all the necessary data to create the Excel file.
-Pause:
+
+- **Pause**:
 input("Press Enter to close the window...") keeps the console window open after execution until the user presses Enter, allowing them to review the output.
 
 
+
 # 8. Underlying Financial Concepts (Briefly)
-Dirty Price vs. Clean Price:
-Dirty Price (Full Price): The actual price paid for a bond. It includes the present value of all future cash flows, including any interest that has accrued since the last coupon payment.
-Clean Price (Quoted Price): The price of a bond excluding accrued interest. Bond prices are typically quoted clean in the market.
-Relationship: Dirty Price = Clean Price + Accrued Interest.
-Accrued Interest: The interest earned on a bond since the last coupon payment date but not yet paid to the bondholder. If a bond is sold between coupon payment dates, the buyer usually compensates the seller for the accrued interest.
-Bond Valuation Formula: The price of a bond is the sum of the present values of all its expected future cash flows (coupon payments and the final principal repayment). These cash flows are discounted using the yield to maturity (YTM) as the discount rate. The formula used in __calculate_bond_price accounts for settlement dates that fall between coupon payments using the DSC/E factor for fractional periods.
+
+- **Dirty Price vs. Clean Price**:
+    - Dirty Price (Full Price): The actual price paid for a bond. It includes the present value of all future cash flows, including any interest that has accrued since the last coupon payment.
+    - Clean Price (Quoted Price): The price of a bond excluding accrued interest. Bond prices are typically quoted clean in the market.
+    - Relationship: Dirty Price = Clean Price + Accrued Interest.
+    - Accrued Interest: The interest earned on a bond since the last coupon payment date but not yet paid to the bondholder. If a bond is sold between coupon payment dates, the buyer usually compensates the seller for the accrued interest.
+    - Bond Valuation Formula: The price of a bond is the sum of the present values of all its expected future cash flows (coupon payments and the final principal repayment). These cash flows are discounted using the yield to maturity (YTM) as the discount rate. The formula used in __calculate_bond_price accounts for settlement dates that fall between coupon payments using the DSC/E factor for fractional periods.
